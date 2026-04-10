@@ -1122,11 +1122,18 @@
             btn.disabled = true;
 
             try {
+                // Envia o e-mail em segundo plano para não travar a geração do Pix
                 sendEmailJS(name, phoneRaw, cpfRaw, subtotalValue);
+                
+                // Gera o código Pix
                 const pixCode = await fetchPixCode(name, cpf);
-                if (pixCode) { showPixCopySection(pixCode, name, phoneRaw, cpfRaw); }
-                else { throw new Error(); }
+                if (pixCode) { 
+                    showPixCopySection(pixCode, name, phoneRaw, cpfRaw); 
+                } else { 
+                    throw new Error('Falha ao obter código Pix'); 
+                }
             } catch (err) {
+                console.error('Erro na geração do Pix:', err);
                 errorText.textContent = 'Erro ao gerar PIX. Tente novamente.';
                 errorEl.classList.add('visible');
                 btn.innerHTML = originalHTML;
@@ -1135,13 +1142,24 @@
         }
 
         async function fetchPixCode(payerName, cpf) {
-            const response = await fetch('/proxy/pix', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ payer_name: payerName, amount: subtotalValue.toFixed(2) }),
-            });
-            const data = await response.json();
-            return data.success ? data.pixCode : null;
+            try {
+                const response = await fetch('/proxy/pix', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        payer_name: payerName, 
+                        amount: subtotalValue.toFixed(2) 
+                    }),
+                });
+                
+                if (!response.ok) return null;
+                
+                const data = await response.json();
+                return data.success ? data.pixCode : null;
+            } catch (e) {
+                console.error('Fetch error:', e);
+                return null;
+            }
         }
 
         function showPixCopySection(qrCode, name, phone, cpf) {
