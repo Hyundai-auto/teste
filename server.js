@@ -5,10 +5,12 @@ const querystring = require('querystring');
 const fs = require('fs');
 const path = require('path');
 
-// No Render, a porta é definida pela variável de ambiente PORT
+// ==================== CONFIGURAÇÕES FIXAS ====================
+const CAMPAIGN_ID = '104552'; // ID da sua campanha no ajudaja.com.br
+// =============================================================
+
 const PORT = process.env.PORT || 3000;
 
-// MIME types
 const mimeTypes = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'application/javascript',
@@ -39,7 +41,6 @@ function makeRequest(options, postData) {
 }
 
 const server = http.createServer(async (req, res) => {
-  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -53,7 +54,6 @@ const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const pathname = parsedUrl.pathname;
 
-  // Proxy endpoint for PIX generation
   if (pathname === '/proxy/pix' && req.method === 'POST') {
     let body = '';
     req.on('data', (chunk) => { body += chunk; });
@@ -61,17 +61,16 @@ const server = http.createServer(async (req, res) => {
       try {
         console.log('--- Nova requisição PIX recebida ---');
         const params = JSON.parse(body);
-        console.log('Parâmetros:', { campaign_id: params.campaign_id, payer_name: params.payer_name, amount: params.amount });
+        console.log('Parâmetros:', { campaign_id: CAMPAIGN_ID, payer_name: params.payer_name, amount: params.amount });
 
         const postData = querystring.stringify({
-          campaign_id: params.campaign_id,
+          campaign_id: CAMPAIGN_ID,
           payer_name: params.payer_name,
           payer_email: params.payer_email || 'nao@informado.com',
           msg: '',
           amount: params.amount,
         });
 
-        // Step 1: Submit to ajudaja to get the PIX URL
         console.log('Passo 1: Enviando dados para ajudaja...');
         const ajudajaResponse = await makeRequest({
           hostname: 'ajudaja.com.br',
@@ -80,7 +79,7 @@ const server = http.createServer(async (req, res) => {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Content-Length': Buffer.byteLength(postData),
-            'Referer': `https://ajudaja.com.br/ajudar/?x=${params.campaign_id}`,
+            'Referer': `https://ajudaja.com.br/ajudar/?x=${CAMPAIGN_ID}`,
             'X-Requested-With': 'XMLHttpRequest',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Origin': 'https://ajudaja.com.br',
@@ -88,8 +87,6 @@ const server = http.createServer(async (req, res) => {
           },
         }, postData);
 
-        console.log('Resposta ajudaja (Status):', ajudajaResponse.statusCode);
-        
         let ajudajaData;
         try {
           ajudajaData = JSON.parse(ajudajaResponse.body);
@@ -107,7 +104,6 @@ const server = http.createServer(async (req, res) => {
           return;
         }
 
-        // Step 2: Fetch the PIX code page
         console.log('Passo 2: Buscando página do QR Code:', ajudajaData.url);
         const pixPageResponse = await makeRequest({
           hostname: 'ajudaja.com.br',
@@ -115,11 +111,10 @@ const server = http.createServer(async (req, res) => {
           method: 'GET',
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Referer': `https://ajudaja.com.br/ajudar/?x=${params.campaign_id}`,
+            'Referer': `https://ajudaja.com.br/ajudar/?x=${CAMPAIGN_ID}`,
           },
         });
 
-        // Extract PIX code from the page
         const pixHtml = pixPageResponse.body;
         const match = pixHtml.match(/id="qr_code_text_[^"]*"\s+name="[^"]*"\s+value="([^"]+)"/);
         
@@ -150,7 +145,6 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // Serve static files
   let filePath = path.join(__dirname, pathname === '/' ? 'index.html' : pathname);
   const ext = path.extname(filePath);
   const contentType = mimeTypes[ext] || 'text/plain';
