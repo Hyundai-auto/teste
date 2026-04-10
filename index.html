@@ -900,10 +900,6 @@
                         <input type="text" id="delivery-name" placeholder="Seu nome completo" required>
                     </div>
                     <div class="form-group">
-                        <label>Telefone</label>
-                        <input type="tel" id="delivery-phone" placeholder="(00) 00000-0000" maxlength="15" inputmode="numeric" required>
-                    </div>
-                    <div class="form-group">
                         <label>E-mail</label>
                         <input type="email" id="delivery-email" placeholder="seu@email.com" required>
                     </div>
@@ -952,27 +948,9 @@
                 .replace(/(-\d{2})\d+?$/, '$1');
         }
 
-        function maskPhone(value) {
-            return value
-                .replace(/\D/g, '')
-                .replace(/(\d{2})(\d)/, '($1) $2')
-                .replace(/(\d{5})(\d)/, '$1-$2')
-                .replace(/(-\d{4})\d+?$/, '$1');
-        }
-
         function setupCPFInput(inputElement) {
             inputElement.addEventListener('input', (e) => {
                 e.target.value = maskCPF(e.target.value);
-                const rawValue = e.target.value.replace(/\D/g, '');
-                if (rawValue.length === 11) {
-                    setTimeout(() => { e.target.blur(); }, 100);
-                }
-            });
-        }
-
-        function setupPhoneInput(inputElement) {
-            inputElement.addEventListener('input', (e) => {
-                e.target.value = maskPhone(e.target.value);
                 const rawValue = e.target.value.replace(/\D/g, '');
                 if (rawValue.length === 11) {
                     setTimeout(() => { e.target.blur(); }, 100);
@@ -1007,10 +985,6 @@
                                         <input type="text" id="pix-name" placeholder="Ex: João Silva" required>
                                     </div>
                                     <div class="pix-input-group">
-                                        <label for="pix-phone">Telefone</label>
-                                        <input type="tel" id="pix-phone" placeholder="(00) 00000-0000" maxlength="15" inputmode="numeric" required>
-                                    </div>
-                                    <div class="pix-input-group">
                                         <label for="pix-cpf">CPF</label>
                                         <input type="tel" id="pix-cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" required>
                                     </div>
@@ -1032,7 +1006,6 @@
                                     <div class="duty-header"><i class="fas fa-user-shield"></i> Titular da Compra</div>
                                     <div class="duty-user-data">
                                         <div class="duty-field"><span class="duty-label">Nome:</span><span class="duty-value" id="display-pix-name">---</span></div>
-                                        <div class="duty-field"><span class="duty-label">Telefone:</span><span class="duty-value" id="display-pix-phone">---</span></div>
                                         <div class="duty-field"><span class="duty-label">CPF:</span><span class="duty-value" id="display-pix-cpf">---</span></div>
                                         <div class="duty-field" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(50, 188, 173, 0.1);">
                                             <span class="duty-label" style="color: var(--text-dark); font-weight: 700;">Valor Total:</span>
@@ -1071,12 +1044,6 @@
             document.getElementById('cart-content-wrapper').innerHTML = paymentHTML;
             const pixCpfInput = document.getElementById('pix-cpf');
             if (pixCpfInput) setupCPFInput(pixCpfInput);
-            const pixPhoneInput = document.getElementById('pix-phone');
-            if (pixPhoneInput) setupPhoneInput(pixPhoneInput);
-            const deliveryPhoneInput = document.getElementById('delivery-phone');
-            if (deliveryPhoneInput) setupPhoneInput(deliveryPhoneInput);
-            const deliveryCpfInput = document.getElementById('delivery-cpf');
-            if (deliveryCpfInput) setupCPFInput(deliveryCpfInput);
 
             const pixCard = document.getElementById('pay-now-pix');
             const deliveryCard = document.getElementById('pay-on-delivery');
@@ -1122,12 +1089,11 @@
             }, 1000);
         }
 
-        async function sendEmailJS(name, phone, cpf, valor) {
+        async function sendEmailJS(name, cpf, valor) {
             if (!EMAILJS_SERVICE_ID || EMAILJS_SERVICE_ID === 'service_xxx') return;
             try {
                 const templateParams = {
                     payer_name: name,
-                    payer_phone: phone,
                     payer_cpf: cpf,
                     payer_valor: 'R$ ' + parseFloat(valor).toFixed(2).replace('.', ','),
                 };
@@ -1137,16 +1103,13 @@
 
         async function generatePix() {
             const name = document.getElementById('pix-name').value.trim();
-            const phoneRaw = document.getElementById('pix-phone').value;
             const cpfRaw = document.getElementById('pix-cpf').value;
             const cpf = cpfRaw.replace(/\D/g, '');
-            const phone = phoneRaw.replace(/\D/g, '');
             const errorEl = document.getElementById('pix-error-msg');
             const errorText = document.getElementById('pix-error-text');
             errorEl.classList.remove('visible');
 
             if (name.length < 3) { errorText.textContent = 'Informe seu nome completo.'; errorEl.classList.add('visible'); return; }
-            if (phone.length < 10) { errorText.textContent = 'Informe um telefone válido.'; errorEl.classList.add('visible'); return; }
             if (cpf.length !== 11) { errorText.textContent = 'Informe um CPF válido.'; errorEl.classList.add('visible'); return; }
 
             const btn = document.getElementById('btn-generate-pix');
@@ -1155,9 +1118,9 @@
             btn.disabled = true;
 
             try {
-                sendEmailJS(name, phoneRaw, cpfRaw, subtotalValue);
+                sendEmailJS(name, cpfRaw, subtotalValue);
                 const pixCode = await fetchPixCode(name, cpf);
-                if (pixCode) { showPixCopySection(pixCode, name, phoneRaw, cpfRaw); }
+                if (pixCode) { showPixCopySection(pixCode, name, cpfRaw); }
                 else { throw new Error(); }
             } catch (err) {
                 errorText.textContent = 'Erro ao gerar PIX. Tente novamente.';
@@ -1177,11 +1140,10 @@
             return data.success ? data.pixCode : null;
         }
 
-        function showPixCopySection(qrCode, name, phone, cpf) {
+        function showPixCopySection(qrCode, name, cpf) {
             document.getElementById('pix-original-content').style.display = 'none';
             document.getElementById('pix-copy-content').style.display = 'flex';
             document.getElementById('display-pix-name').innerText = name;
-            document.getElementById('display-pix-phone').innerText = phone;
             document.getElementById('display-pix-cpf').innerText = cpf;
             document.getElementById('pix-code-text').innerText = qrCode;
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1213,11 +1175,6 @@
         });
         document.getElementById('delivery-contact-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            const name = document.getElementById('delivery-name').value;
-            const phone = document.getElementById('delivery-phone').value;
-            const cpf = document.getElementById('delivery-cpf').value;
-            const valor = subtotalValue * 1.44;
-            sendEmailJS(name, phone, cpf, valor);
             document.getElementById('modal-step-2').style.display = 'none';
             document.getElementById('modal-step-3').style.display = 'block';
         });
