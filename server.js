@@ -7,7 +7,7 @@ const path = require('path');
 
 // ==================== CONFIGURAÇÕES FIXAS ====================
 // Cole o link completo da sua campanha abaixo:
-const AJUDAJA_LINK = 'https://ajudaja.com.br/ajudar/?x=104552'; 
+const AJUDAJA_LINK = 'https://ajudaja.com.br/ajudar/?x=10455'; 
 // =============================================================
 
 // Função para extrair o ID da campanha do link
