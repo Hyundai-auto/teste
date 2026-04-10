@@ -6,9 +6,21 @@ const fs = require('fs');
 const path = require('path');
 
 // ==================== CONFIGURAÇÕES FIXAS ====================
-const CAMPAIGN_ID = '104552'; // ID da sua campanha no ajudaja.com.br
+// Cole o link completo da sua campanha abaixo:
+const AJUDAJA_LINK = 'https://ajudaja.com.br/ajudar/?x=104552'; 
 // =============================================================
 
+// Função para extrair o ID da campanha do link
+function getCampaignId(link) {
+  try {
+    const parsed = url.parse(link, true);
+    return parsed.query.x || '104552'; // Padrão se não encontrar
+  } catch (e) {
+    return '104552';
+  }
+}
+
+const CAMPAIGN_ID = getCampaignId(AJUDAJA_LINK);
 const PORT = process.env.PORT || 3000;
 
 const mimeTypes = {
