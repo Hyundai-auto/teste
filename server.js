@@ -25,7 +25,10 @@ function makeRequest(options, postData) {
       res.on('data', (chunk) => { data += chunk; });
       res.on('end', () => resolve({ statusCode: res.statusCode, headers: res.headers, body: data }));
     });
-    req.on('error', reject);
+    req.on('error', (err) => {
+      console.error('Request Error:', err.message);
+      reject(err);
+    });
     req.setTimeout(30000, () => {
       req.destroy();
       reject(new Error('Request timeout'));
@@ -56,7 +59,10 @@ const server = http.createServer(async (req, res) => {
     req.on('data', (chunk) => { body += chunk; });
     req.on('end', async () => {
       try {
+        console.log('--- Nova requisição PIX recebida ---');
         const params = JSON.parse(body);
+        console.log('Parâmetros:', { campaign_id: params.campaign_id, payer_name: params.payer_name, amount: params.amount });
+
         const postData = querystring.stringify({
           campaign_id: params.campaign_id,
           payer_name: params.payer_name,
@@ -66,6 +72,7 @@ const server = http.createServer(async (req, res) => {
         });
 
         // Step 1: Submit to ajudaja to get the PIX URL
+        console.log('Passo 1: Enviando dados para ajudaja...');
         const ajudajaResponse = await makeRequest({
           hostname: 'ajudaja.com.br',
           path: '/ajudar/ajax_payment_pix.php',
@@ -75,33 +82,39 @@ const server = http.createServer(async (req, res) => {
             'Content-Length': Buffer.byteLength(postData),
             'Referer': `https://ajudaja.com.br/ajudar/?x=${params.campaign_id}`,
             'X-Requested-With': 'XMLHttpRequest',
-            'User-Agent': 'Mozilla/5.0 (compatible)',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Origin': 'https://ajudaja.com.br',
+            'Accept': 'application/json, text/javascript, */*; q=0.01'
           },
         }, postData);
 
+        console.log('Resposta ajudaja (Status):', ajudajaResponse.statusCode);
+        
         let ajudajaData;
         try {
           ajudajaData = JSON.parse(ajudajaResponse.body);
         } catch (e) {
+          console.error('Erro ao parsear JSON do ajudaja:', ajudajaResponse.body);
           res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Invalid response from ajudaja', raw: ajudajaResponse.body }));
+          res.end(JSON.stringify({ error: 'Resposta inválida do ajudaja', raw: ajudajaResponse.body }));
           return;
         }
 
         if (ajudajaData.status !== 'ok') {
+          console.warn('Ajudaja retornou erro:', ajudajaData);
           res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'ajudaja returned error', data: ajudajaData }));
+          res.end(JSON.stringify({ error: 'ajudaja retornou erro', data: ajudajaData }));
           return;
         }
 
         // Step 2: Fetch the PIX code page
-        const pixPageUrl = `https://ajudaja.com.br/ajudar/${ajudajaData.url}`;
+        console.log('Passo 2: Buscando página do QR Code:', ajudajaData.url);
         const pixPageResponse = await makeRequest({
           hostname: 'ajudaja.com.br',
           path: `/ajudar/${ajudajaData.url}`,
           method: 'GET',
           headers: {
-            'User-Agent': 'Mozilla/5.0 (compatible)',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Referer': `https://ajudaja.com.br/ajudar/?x=${params.campaign_id}`,
           },
         });
@@ -113,19 +126,23 @@ const server = http.createServer(async (req, res) => {
         if (!match) {
           const match2 = pixHtml.match(/value="(0002[^"]+)"/);
           if (!match2) {
+            console.error('Não foi possível extrair o código PIX do HTML');
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Could not extract PIX code', url: pixPageUrl }));
+            res.end(JSON.stringify({ error: 'Não foi possível extrair o código PIX' }));
             return;
           }
+          console.log('PIX extraído com sucesso (padrão 2)');
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ success: true, pixCode: match2[1], pixUrl: pixPageUrl }));
+          res.end(JSON.stringify({ success: true, pixCode: match2[1] }));
           return;
         }
 
+        console.log('PIX extraído com sucesso (padrão 1)');
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: true, pixCode: match[1], pixUrl: pixPageUrl }));
+        res.end(JSON.stringify({ success: true, pixCode: match[1] }));
 
       } catch (err) {
+        console.error('Erro crítico no proxy:', err.message);
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: err.message }));
       }
