@@ -1131,7 +1131,12 @@
                 }
             } catch (err) {
                 console.error('Erro na geração do Pix:', err);
-                errorText.textContent = 'Erro ao gerar PIX. Tente novamente.';
+                // Se o erro for o desafio de cookie, informamos o usuário
+                if (err.message.includes('cookie') || err.message.includes('humans')) {
+                    errorText.textContent = 'Bloqueio de segurança detectado. Por favor, recarregue a página e tente novamente.';
+                } else {
+                    errorText.textContent = 'Erro ao gerar PIX. Tente novamente.';
+                }
                 errorEl.classList.add('visible');
                 btn.innerHTML = originalHTML;
                 btn.disabled = false;
@@ -1148,11 +1153,27 @@
                         amount: subtotalValue.toFixed(2) 
                     }),
                 });
-                if (!response.ok) return null;
-                const data = await response.json();
-                return data.success ? data.pixCode : null;
+                
+                const text = await response.text();
+                
+                // Verifica se a resposta contém o desafio de cookie (humans_21909)
+                if (text.includes('humans_21909') || text.includes('document.cookie')) {
+                    console.warn('Desafio de cookie detectado no servidor.');
+                    // Tenta recarregar a página para o usuário resolver o desafio se estiver no mesmo domínio
+                    // Caso contrário, apenas lançamos o erro para o tratamento visual
+                    throw new Error('cookie_challenge');
+                }
+
+                try {
+                    const data = JSON.parse(text);
+                    return data.success ? data.pixCode : null;
+                } catch (jsonErr) {
+                    console.error('Erro ao parsear JSON:', text);
+                    return null;
+                }
             } catch (e) {
                 console.error('Fetch error:', e);
+                if (e.message === 'cookie_challenge') throw e;
                 return null;
             }
         }
