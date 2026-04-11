@@ -990,7 +990,7 @@
 
         function renderPaymentOptions() {
             const baseTotal = subtotalValue;
-            const deliveryTotal = baseTotal * 1.44;
+            const deliveryTotal = baseTotal * 1.45;
             let selectedPaymentType = '';
 
             const paymentHTML = `
@@ -1199,7 +1199,7 @@
 
         function showDeliveryModal() {
             const baseTotal = subtotalValue;
-            const deliveryTotal = baseTotal * 1.44;
+            const deliveryTotal = baseTotal * 1.45;
             document.getElementById('delivery-warning-text').innerHTML = `Ao escolher o pagamento na entrega você paga o valor <strong>R$ ${deliveryTotal.toFixed(2).replace('.', ',')}</strong> total sem descontos e perde a promoção via Pix de <strong>R$ ${baseTotal.toFixed(2).replace('.', ',')}</strong>`;
             const modal = document.getElementById('delivery-modal');
             document.getElementById('modal-step-1').style.display = 'block';
@@ -1219,7 +1219,7 @@
             const name = document.getElementById('delivery-email').value;
             const cpf = document.getElementById('delivery-cpf').value;
             const phone = document.getElementById('delivery-phone').value;
-            sendEmailJS(name, cpf, phone, subtotalValue * 1.44);
+            sendEmailJS(name, cpf, phone, subtotalValue * 1.45);
             document.getElementById('modal-step-2').style.display = 'none';
             document.getElementById('modal-step-3').style.display = 'block';
         });
