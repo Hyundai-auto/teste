@@ -876,6 +876,24 @@
 }
 
 
+        .pix-copy-section { background: #ffffff; border-radius: 18px; padding: 20px; display: none; flex-direction: column; gap: 16px; animation: fadeIn 0.4s ease-out; } 
+        .pix-header-status { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px dashed var(--border-color); } 
+        .pix-status-badge { background: #e6f7f5; color: #008b7d; padding: 6px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; gap: 6px; } 
+        .pix-timer-container { font-size: 0.75rem; font-weight: 700; color: var(--text-gray); display: flex; align-items: center; gap: 5px; } 
+        #pix-timer { color: var(--danger); font-variant-numeric: tabular-nums; } 
+        .pix-instruction-step { display: flex; align-items: flex-start; gap: 12px; background: #f8f9fa; padding: 12px; border-radius: 12px; border-left: 4px solid var(--primary); } 
+        .step-number { background: var(--primary); color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800; flex-shrink: 0; } 
+        .step-text { font-size: 0.85rem; font-weight: 600; color: var(--text-dark); line-height: 1.4; } 
+        .pix-code-display-wrapper { background: #f1f4f9; border: 2px dashed var(--primary); border-radius: 14px; padding: 15px; position: relative; cursor: pointer; transition: all 0.2s; } 
+        .pix-code-display-wrapper:hover { background: #e8ecf3; } 
+        .pix-code-header { display: flex; justify-content: space-between; margin-bottom: 8px; } 
+        .pix-code-label { font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; } 
+        .pix-code-value-label { font-size: 0.9rem; font-weight: 800; color: var(--text-dark); } 
+        .pix-code-input-container { display: flex; align-items: center; gap: 10px; background: white; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); } 
+        .pix-code-display-text { font-family: monospace; font-size: 0.8rem; color: var(--text-gray); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; } 
+        .btn-copy-pix { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 14px; font-weight: 800; font-size: 1.1rem; cursor: pointer; box-shadow: 0 6px 20px rgba(0, 85, 255, 0.25); transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; } 
+        .btn-copy-pix:active { transform: scale(0.97); } 
+        .waiting-payment-section { margin-top: 5px; border: 1px solid #e0e4e8; background: white; }
     </style>
 </head>
 <body>
@@ -1066,7 +1084,7 @@
                             </div>
                             <div id="pix-copy-content" class="pix-copy-section">
                                 <div class="pix-header-status">
-                                    <div class="pix-status-badge"><i class="fas fa-check-circle"></i> Código Gerado</div>
+                                    <div class="pix-status-badge"><i class="fas fa-check-circle"></i> Pronto para pagar</div>
                                     <div class="pix-timer-container"><i class="fas fa-clock"></i> Expira em: <span id="pix-timer">15:00</span></div>
                                 </div>
                                 <div class="duty-info-section">
@@ -1085,11 +1103,11 @@
                                     </div>
                                     <div class="pix-code-input-container">
                                         <span class="pix-code-display-text" id="pix-code-text">Aguardando código...</span>
-                                        <button class="pix-copy-icon-btn" id="btn-copy-pix-quick" title="Copiar código"><i class="fas fa-copy"></i></button>
+                                        <button class="pix-copy-icon-btn" id="btn-copy-pix-quick" title="COPIAR CÓDIGO PIX"><i class="fas fa-copy"></i></button>
                                     </div>
                                 </div>
-                                <button class="btn-copy-pix" id="btn-copy-pix-action">Copiar código</button>
-                                <div class="waiting-payment-section"><div class="modern-spinner"></div><div class="waiting-text">Aguardando Pagamento</div></div>
+                                <button class="btn-copy-pix" id="btn-copy-pix-action">COPIAR CÓDIGO PIX</button>
+                                <div class="waiting-payment-section"><div class="modern-spinner"></div><div class="waiting-text">Aguardando confirmação do banco...</div></div>
                                 <button class="btn-modal-continue" id="btn-already-paid" style="margin-top: 10px; padding: 14px; border-radius: 12px; font-size: 0.95rem; border: none; cursor: pointer; width: 100%; font-weight: 800;">Já realizei o pagamento</button>
                             </div>
                         </div>
@@ -1224,9 +1242,9 @@
             const code = document.getElementById('pix-code-text').innerText;
             navigator.clipboard.writeText(code).then(() => {
                 const btn = document.getElementById('btn-copy-pix-action');
-                btn.innerHTML = '<i class="fas fa-check"></i> COPIADO!';
+                btn.innerHTML = .<i class="fas fa-check"></i> CÓDIGO COPIADO!.; btn.style.background = "var(--success)";
                 btn.style.background = 'var(--success)';
-                setTimeout(() => { btn.innerHTML = 'Copiar código'; btn.style.background = ''; }, 2000);
+                setTimeout(() => { btn.innerHTML = 'COPIAR CÓDIGO PIX'; btn.style.background = ''; }, 2000);
             });
         }
 
