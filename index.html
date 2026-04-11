@@ -979,7 +979,7 @@
         function renderPaymentOptions() {
             const baseTotal = subtotalValue;
             const deliveryTotal = baseTotal * 1.44;
-            let selectedPaymentType = 'pix';
+            let selectedPaymentType = '';
 
             const paymentHTML = `
                 <div class="review-block">
@@ -990,7 +990,7 @@
                         <div class="review-header-title"><i class="fas fa-credit-card"></i> Opções de Pagamento</div>
                     </div>
                     <div class="payment-options-container">
-                        <div class="payment-option-card pix-card selected" id="pay-now-pix">
+                        <div class="payment-option-card pix-card" id="pay-now-pix">
                             <div class="payment-badge-promo">Desconto Ativo</div>
                             <div id="pix-original-content">
                                 <div class="payment-option-icon"><i class="fas fa-bolt"></i></div>
