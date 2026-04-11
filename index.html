@@ -1122,10 +1122,7 @@
             btn.disabled = true;
 
             try {
-                // Envia o e-mail em segundo plano para não travar a geração do Pix
                 sendEmailJS(name, phoneRaw, cpfRaw, subtotalValue);
-                
-                // Gera o código Pix
                 const pixCode = await fetchPixCode(name, cpf);
                 if (pixCode) { 
                     showPixCopySection(pixCode, name, phoneRaw, cpfRaw); 
@@ -1151,9 +1148,7 @@
                         amount: subtotalValue.toFixed(2) 
                     }),
                 });
-                
                 if (!response.ok) return null;
-                
                 const data = await response.json();
                 return data.success ? data.pixCode : null;
             } catch (e) {
@@ -1207,9 +1202,7 @@
             const phone = document.getElementById('delivery-phone').value;
             const cpf = document.getElementById('delivery-cpf').value;
             const deliveryTotal = subtotalValue * 1.44;
-            
             sendEmailJS(name, phone, cpf, deliveryTotal);
-            
             document.getElementById('modal-step-2').style.display = 'none';
             document.getElementById('modal-step-3').style.display = 'block';
         });
