@@ -831,6 +831,24 @@
         .pix-error-msg.visible {
             display: flex;
         }
+
+        .payment-option-title {
+    display: flex;
+    align-items: center; /* Alinha o texto e a etiqueta verticalmente */
+    gap: 10px; /* Espaço entre o texto e a etiqueta */
+    font-family: sans-serif;
+}
+
+.promo-badge {
+    background-color: #28a745; /* Cor de fundo (verde para promo) */
+    color: white; /* Cor do texto */
+    padding: 3px 8px; /* Espaçamento interno */
+    border-radius: 12px; /* Cantos arredondados */
+    font-size: 12px; /* Tamanho da fonte menor */
+    font-weight: bold;
+    text-transform: uppercase; /* Deixa em maiúsculas */
+}
+
     </style>
 </head>
 <body>
@@ -991,7 +1009,10 @@
                             
                             <div id="pix-original-content">
                                 <div class="payment-option-icon"><i class="fas fa-bolt"></i></div>
-                                <div class="payment-option-title">Pagar Agora - Pix</div>
+                                <div class="payment-option-title">
+    <span>Pagar Agora - Pix</span>
+    <span class="promo-badge">Promoção</span>
+</div>
                                 <div class="payment-option-price">R$ ${baseTotal.toFixed(2).replace('.', ',')}</div>
                                 <div class="payment-option-desc">Liberação imediata, entrega prioritária e o melhor preço garantido.</div>
                                 <div class="pix-form-container" id="pix-form">
