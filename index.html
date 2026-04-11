@@ -1015,7 +1015,7 @@
                                         <span id="pix-error-text">Erro ao gerar código PIX.</span>
                                     </div>
                                     <button class="payment-action-btn" id="btn-generate-pix" style="margin-top:10px;">
-                                        <span class="btn-text">Gerar Código Pix <i class="fas fa-check"></i></span>
+                                        <span class="btn-text">Pagar R$ ${baseTotal.toFixed(2).replace('.', ',')} <i class="fas fa-check"></i></span>
                                     </button>
                                 </div>
                             </div>
@@ -1197,6 +1197,7 @@
         }
 
         document.getElementById('modal-close-btn-delivery').addEventListener('click', () => document.getElementById('delivery-modal').classList.remove('active'));
+        document.getElementById('modal-back-to-pix').addEventListener('click', () => document.getElementById('delivery-modal').classList.remove('active'));
         document.getElementById('modal-continue-delivery').addEventListener('click', () => {
             document.getElementById('modal-step-1').style.display = 'none';
             document.getElementById('modal-step-2').style.display = 'block';
