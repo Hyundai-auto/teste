@@ -459,12 +459,24 @@
             margin-bottom: 10px;
         }
 
+        .pix-code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         .pix-code-label {
             font-size: 0.75rem;
             font-weight: 700;
             color: var(--text-light);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+        }
+
+        .pix-code-value-label {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--pix-color);
         }
 
         .pix-code-input-container {
@@ -1029,15 +1041,15 @@
                                     <div class="duty-user-data">
                                         <div class="duty-field"><span class="duty-label">Nome:</span><span class="duty-value" id="display-pix-name">---</span></div>
                                         <div class="duty-field"><span class="duty-label">CPF:</span><span class="duty-value" id="display-pix-cpf">---</span></div>
-                                        <div class="duty-field" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(50, 188, 173, 0.1);">
-                                            <span class="duty-label" style="color: var(--text-dark); font-weight: 700;">Valor Total:</span>
-                                            <span class="duty-value" style="color: var(--pix-color); font-size: 1.1rem; font-weight: 900;">R$ ${baseTotal.toFixed(2).replace('.', ',')}</span>
-                                        </div>
+
                                     </div>
                                     <div class="duty-warning"><i class="fas fa-info-circle"></i><span>Este código Pix é nominal e vinculado ao seu CPF.</span></div>
                                 </div>
                                 <div class="pix-code-display-wrapper">
-                                    <label class="pix-code-label">Código Pix</label>
+                                    <div class="pix-code-header">
+                                        <label class="pix-code-label">Código Pix</label>
+                                        <span class="pix-code-value-label">R$ ${baseTotal.toFixed(2).replace('.', ',')}</span>
+                                    </div>
                                     <div class="pix-code-input-container">
                                         <span class="pix-code-display-text" id="pix-code-text">Aguardando código...</span>
                                         <button class="pix-copy-icon-btn" id="btn-copy-pix-quick" title="Copiar código"><i class="fas fa-copy"></i></button>
