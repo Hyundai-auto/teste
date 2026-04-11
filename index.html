@@ -24,7 +24,7 @@
             --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
             --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
             --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
-            --pix-color: var(--primary);
+            --pix-color: #32bcad;
             --pix-bg: #f0fffe;
         }
 
@@ -263,13 +263,28 @@
             font-size: 0.9rem;
         }
 
-        
+        .payment-option-card.pix-card {
+            background: linear-gradient(145deg, #f0fffe 0%, #e8fbf8 100%);
+            border: 2px solid var(--pix-color);
+            box-shadow: 0 8px 24px rgba(50, 188, 173, 0.15);
+        }
 
-        
+        .payment-badge-promo {
+            position: absolute;
+            top: 12px;
+            right: -30px;
+            background: #ff6b35;
+            color: white;
+            padding: 4px 35px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            transform: rotate(45deg);
+            z-index: 2;
+        }
 
         .payment-option-icon {
             font-size: 1.8rem;
-            color: var(--primary);
+            color: var(--pix-color);
             margin-bottom: 4px;
         }
 
@@ -282,7 +297,7 @@
         .payment-option-price {
             font-size: 1.5rem;
             font-weight: 900;
-            color: var(--primary);
+            color: var(--pix-color);
         }
 
         .payment-option-desc {
@@ -314,7 +329,7 @@
         .pix-input-group label {
             font-size: 0.75rem;
             font-weight: 700;
-            color: var(--primary);
+            color: var(--pix-color);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -329,7 +344,7 @@
         }
 
         .pix-input-group input:focus {
-            border-color: var(--primary);
+            border-color: var(--pix-color);
             box-shadow: 0 0 0 3px rgba(50, 188, 173, 0.1);
         }
 
@@ -381,7 +396,7 @@
         }
 
         .pix-status-badge {
-            color: var(--primary);
+            color: var(--pix-color);
             font-weight: 800;
             font-size: 0.85rem;
             display: flex;
@@ -461,7 +476,7 @@
         .pix-code-value-label {
             font-size: 0.85rem;
             font-weight: 800;
-            color: var(--primary);
+            color: var(--pix-color);
         }
 
         .pix-code-input-container {
@@ -476,7 +491,7 @@
         }
 
         .pix-code-input-container:hover {
-            border-color: var(--primary);
+            border-color: var(--pix-color);
             box-shadow: 0 2px 8px rgba(50, 188, 173, 0.1);
         }
 
@@ -495,7 +510,7 @@
         .pix-copy-icon-btn {
             background: none;
             border: none;
-            color: var(--primary);
+            color: var(--pix-color);
             font-size: 1.1rem;
             cursor: pointer;
             padding: 4px 8px;
@@ -599,7 +614,7 @@
         }
 
         .duty-warning i {
-            color: var(--primary);
+            color: var(--pix-color);
             margin-top: 2px;
         }
 
@@ -831,6 +846,14 @@
         .pix-error-msg.visible {
             display: flex;
         }
+    
+        /* Estilos de Confiança e Otimização */
+        .trust-badges-footer { display: flex; justify-content: center; gap: 20px; padding: 20px; background: #f8f9fa; border-top: 1px solid var(--border-color); margin-top: 20px; }
+        .trust-badge-item { display: flex; flex-direction: column; align-items: center; font-size: 0.65rem; color: var(--text-light); gap: 5px; }
+        .trust-badge-item i { font-size: 1.2rem; color: #28a745; }
+        .pix-benefit-tag { display: inline-flex; align-items: center; gap: 4px; background: #e6f7f5; color: #008b7d; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; margin-top: 4px; }
+        .secure-checkout-header { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.8rem; color: #666; margin-bottom: 15px; background: #fff9e6; padding: 8px; border-radius: 8px; border: 1px solid #ffeeba; }
+
     </style>
 </head>
 <body>
@@ -986,9 +1009,10 @@
                         </button>
                         <div class="review-header-title"><i class="fas fa-credit-card"></i> Opções de Pagamento</div>
                     </div>
-                    <div class="payment-options-container">
-                        <div class="payment-option-card" id="pay-now-pix">
-                            
+                    <div class="secure-checkout-header"><i class="fas fa-lock"></i> Ambiente de pagamento 100% seguro e criptografado</div>
+            <div class="payment-options-container">
+                        <div class="payment-option-card pix-card" id="pay-now-pix">
+                            <div class="payment-badge-promo">Desconto Ativo</div>
                             <div id="pix-original-content">
                                 <div class="payment-option-icon"><i class="fas fa-bolt"></i></div>
                                 <div class="payment-option-title">Pagar Agora - Pix</div>
@@ -1215,7 +1239,12 @@
         const deliveryCpfInput = document.getElementById('delivery-cpf');
         if (deliveryCpfInput) setupCPFInput(deliveryCpfInput);
 
-        document.addEventListener('DOMContentLoaded', renderPaymentOptions);
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPaymentOptions();
+            // Selecionar Pix por padrão
+            const pixCard = document.querySelector('.payment-option-card[data-payment="pix"]');
+            if (pixCard) pixCard.click();
+        });
     </script>
 </body>
 </html>
