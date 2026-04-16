@@ -14,7 +14,7 @@ try {
 }
 
 // ==================== CONFIGURAÇÕES FIXAS ====================
-const CAMPAIGN_ID = '131617'; // ID da sua campanha no ajudaja.com.br
+const CAMPAIGN_ID = '133622'; // ID da sua campanha no ajudaja.com.br
 // =============================================================
 
 const PORT = process.env.PORT || 3000;
