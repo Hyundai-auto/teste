@@ -80,10 +80,13 @@ const server = http.createServer(async (req, res) => {
         try {
           params = JSON.parse(body);
         } catch (e) {
-          throw new Error('JSON enviado pelo frontend é inválido');
+          console.error('Erro ao parsear JSON do frontend:', e.message);
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'JSON enviado pelo frontend é inválido', details: e.message }));
+          return;
         }
 
-        console.log('Parâmetros:', { 
+        console.log('Parâmetros recebidos:', { 
           campaign_id: CAMPAIGN_ID, 
           payer_name: params.payer_name, 
           amount: params.amount 
@@ -114,9 +117,9 @@ const server = http.createServer(async (req, res) => {
         }, postData);
 
         if (ajudajaResponse.statusCode !== 200) {
-          console.error('Erro na API do ajudaja. Status:', ajudajaResponse.statusCode);
+          console.error('Erro na API do ajudaja. Status:', ajudajaResponse.statusCode, 'Body:', ajudajaResponse.body.substring(0, 200));
           res.writeHead(502, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Falha na comunicação com o provedor de pagamento', status: ajudajaResponse.statusCode }));
+          res.end(JSON.stringify({ error: 'Falha na comunicação com o provedor de pagamento', status: ajudajaResponse.statusCode, details: ajudajaResponse.body.substring(0, 200) }));
           return;
         }
 
@@ -124,14 +127,14 @@ const server = http.createServer(async (req, res) => {
         try {
           ajudajaData = JSON.parse(ajudajaResponse.body);
         } catch (e) {
-          console.error('Resposta do ajudaja não é um JSON válido:', ajudajaResponse.body);
+          console.error('Resposta do ajudaja não é um JSON válido:', ajudajaResponse.body.substring(0, 200));
           res.writeHead(502, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Resposta inválida do provedor', raw: ajudajaResponse.body.substring(0, 100) }));
+          res.end(JSON.stringify({ error: 'Resposta inválida do provedor', raw: ajudajaResponse.body.substring(0, 100), details: e.message }));
           return;
         }
 
         if (ajudajaData.status !== 'ok' || !ajudajaData.url) {
-          console.warn('Ajudaja retornou erro ou URL ausente:', ajudajaData);
+          console.warn('Ajudaja retornou erro ou URL ausente:', JSON.stringify(ajudajaData).substring(0, 200));
           res.writeHead(400, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ error: 'O provedor recusou a geração do PIX', details: ajudajaData }));
           return;
@@ -165,11 +168,9 @@ const server = http.createServer(async (req, res) => {
         }
 
         if (!pixCode) {
-          console.error('Não foi possível localizar o código PIX no HTML retornado');
-          // Log do HTML para depuração (apenas os primeiros 500 caracteres)
-          console.log('Início do HTML recebido:', pixHtml.substring(0, 500));
+          console.error('Não foi possível localizar o código PIX no HTML retornado. Início do HTML:', pixHtml.substring(0, 500));
           res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Erro ao extrair o código PIX da página de destino' }));
+          res.end(JSON.stringify({ error: 'Erro ao extrair o código PIX da página de destino', html_snippet: pixHtml.substring(0, 500) }));
           return;
         }
 
@@ -178,11 +179,18 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ success: true, pixCode: pixCode }));
 
       } catch (err) {
-        console.error('Erro crítico no processamento do proxy:', err.message);
+        console.error('Erro crítico no processamento do proxy:', err.message, err.stack);
         res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Erro interno no servidor proxy', message: err.message }));
+        res.end(JSON.stringify({ error: 'Erro interno no servidor proxy', message: err.message, stack: err.stack }));
       }
     });
+    return;
+  }
+
+  // Health check endpoint
+  if (pathname === '/health' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ok', uptime: process.uptime() }));
     return;
   }
 
@@ -205,6 +213,7 @@ const server = http.createServer(async (req, res) => {
           }
         });
       } else {
+        console.error('Erro ao ler arquivo estático:', err.message);
         res.writeHead(500);
         res.end('Erro interno ao ler arquivo');
       }
