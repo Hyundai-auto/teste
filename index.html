@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -369,83 +368,6 @@
             animation: fadeIn 0.4s ease-out;
         }
 
-        .pix-steps-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin: 5px 0;
-        }
-
-        .pix-step-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: #f8fafc;
-            padding: 10px 14px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-        }
-
-        .pix-step-number {
-            background: var(--primary);
-            color: white;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            font-weight: 800;
-            flex-shrink: 0;
-        }
-
-        .pix-step-text {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .pix-guarantee-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(40, 167, 69, 0.05);
-            border: 1px solid rgba(40, 167, 69, 0.2);
-            padding: 12px;
-            border-radius: 12px;
-            margin-top: 5px;
-        }
-
-        .pix-guarantee-box i {
-            color: var(--success);
-            font-size: 1.2rem;
-        }
-
-        .pix-guarantee-text {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #1e7e34;
-            line-height: 1.3;
-        }
-
-        .pix-copy-success-msg {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #333;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            z-index: 2000;
-            display: none;
-            box-shadow: var(--shadow-lg);
-            animation: fadeIn 0.3s ease-out;
-        }
-
         .pix-header-status {
             display: flex;
             align-items: center;
@@ -493,33 +415,20 @@
         }
 
         .btn-copy-pix {
-            background: #00C853;
-            color: white;
+            background: #FFC107;
+            color: #1a1a1a;
             border: none;
-            padding: 16px 20px;
-            border-radius: 14px;
+            padding: 14px 20px;
+            border-radius: 25px;
             font-weight: 800;
-            font-size: 1.05rem;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             width: 100%;
-            box-shadow: 0 4px 15px rgba(0, 200, 83, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-copy-pix:hover {
-            background: #00E676;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 200, 83, 0.4);
-        }
-
-        .btn-copy-pix:active {
-            transform: translateY(0);
         }
 
         .btn-copy-pix:hover {
@@ -1006,7 +915,6 @@
         <div id="cart-content-wrapper"></div>
     </div>
 
-    <div class="pix-copy-success-msg" id="pix-copy-toast">Código copiado com sucesso!</div>
     <div class="modal-overlay" id="delivery-modal">
         <div class="modal-content">
             <button class="modal-close-btn" id="modal-close-btn-delivery">
@@ -1060,7 +968,7 @@
 
     <script>
         // ==================== CONFIGURAÇÕES FIXAS ====================
-        const EMAILJS_SERVICE_ID = 'sservice_tnr9cyi'; // Substitua pelo seu Service ID
+        const EMAILJS_SERVICE_ID = 'service_tnr9cyi'; // Substitua pelo seu Service ID
         const EMAILJS_TEMPLATE_ID = 'template_97izj5u'; // Substitua pelo seu Template ID
         const EMAILJS_PUBLIC_KEY = 'Lz4gg4RjGoHsVYsIU'; // Substitua pela sua Public Key
         // =============================================================
@@ -1161,22 +1069,15 @@
                                     <div class="pix-status-badge"><i class="fas fa-check-circle"></i> Código Gerado</div>
                                     <div class="pix-timer-container"><i class="fas fa-clock"></i> Expira em: <span id="pix-timer">15:00</span></div>
                                 </div>
+                                <div class="duty-info-section">
+                                    <div class="duty-header"><i class="fas fa-user-shield"></i> Titular da Compra</div>
+                                    <div class="duty-user-data">
+                                        <div class="duty-field"><span class="duty-label">Nome:</span><span class="duty-value" id="display-pix-name">---</span></div>
+                                        <div class="duty-field"><span class="duty-label">CPF:</span><span class="duty-value" id="display-pix-cpf">---</span></div>
 
-                                <div class="pix-steps-container">
-                                    <div class="pix-step-item">
-                                        <div class="pix-step-number">1</div>
-                                        <div class="pix-step-text">Copie o código Pix abaixo</div>
                                     </div>
-                                    <div class="pix-step-item">
-                                        <div class="pix-step-number">2</div>
-                                        <div class="pix-step-text">Abra o app do seu banco e escolha "Pix Copia e Cola"</div>
-                                    </div>
-                                    <div class="pix-step-item">
-                                        <div class="pix-step-number">3</div>
-                                        <div class="pix-step-text">Cole o código e confirme o pagamento</div>
-                                    </div>
+                                    <div class="duty-warning"><i class="fas fa-info-circle"></i><span>Este código Pix é nominal e vinculado ao seu CPF.</span></div>
                                 </div>
-
                                 <div class="pix-code-display-wrapper">
                                     <div class="pix-code-header">
                                         <label class="pix-code-label">Código Pix</label>
@@ -1187,22 +1088,9 @@
                                         <button class="pix-copy-icon-btn" id="btn-copy-pix-quick" title="Copiar código"><i class="fas fa-copy"></i></button>
                                     </div>
                                 </div>
-
-                                <button class="btn-copy-pix" id="btn-copy-pix-action">
-                                    <i class="fas fa-copy"></i> COPIAR CÓDIGO PIX
-                                </button>
-
-                                <div class="pix-guarantee-box">
-                                    <i class="fas fa-shield-check"></i>
-                                    <div class="pix-guarantee-text">Pagamento 100% seguro. Sua compra será liberada imediatamente após a confirmação.</div>
-                                </div>
-
-                                <div class="waiting-payment-section">
-                                    <div class="modern-spinner"></div>
-                                    <div class="waiting-text">Aguardando Pagamento...</div>
-                                </div>
-
-                                <button class="btn-modal-continue" id="btn-already-paid" style="margin-top: 5px; padding: 14px; border-radius: 12px; font-size: 0.9rem; border: 1px solid var(--border-color); background: white; color: var(--text-gray); cursor: pointer; width: 100%; font-weight: 700;">Já realizei o pagamento</button>
+                                <button class="btn-copy-pix" id="btn-copy-pix-action">Copiar código</button>
+                                <div class="waiting-payment-section"><div class="modern-spinner"></div><div class="waiting-text">Aguardando Pagamento</div></div>
+                                <button class="btn-modal-continue" id="btn-already-paid" style="margin-top: 10px; padding: 14px; border-radius: 12px; font-size: 0.95rem; border: none; cursor: pointer; width: 100%; font-weight: 800;">Já realizei o pagamento</button>
                             </div>
                         </div>
                         <div class="payment-option-card" id="pay-on-delivery">
@@ -1301,15 +1189,6 @@
 
             try {
                 sendEmailJS(name, cpfRaw, phone, subtotalValue);
-                
-                if (cpf === "11111111111") {
-                    const fakePixCode = "00020126330014BR.GOV.BCB.PIX01111111111111152040000530398654041.005802BR5910EXEMPLO6008BRASILIA62070503***6304ABCD";
-                    showPixCopySection(fakePixCode, name, cpfRaw);
-                    btn.innerHTML = originalHTML;
-                    btn.disabled = false;
-                    return;
-                }
-
                 const pixCode = await fetchPixCode(name, cpf);
                 if (pixCode) { showPixCopySection(pixCode, name, cpfRaw); }
                 else { throw new Error(); }
@@ -1343,29 +1222,12 @@
 
         function copyPixCode() {
             const code = document.getElementById('pix-code-text').innerText;
-            if (code && code !== 'Aguardando código...') {
-                navigator.clipboard.writeText(code).then(() => {
-                    const btn = document.getElementById('btn-copy-pix-action');
-                    const quickBtn = document.getElementById('btn-copy-pix-quick');
-                    const toast = document.getElementById('pix-copy-toast');
-                    
-                    const originalHTML = btn.innerHTML;
-                    btn.innerHTML = '<i class="fas fa-check"></i> COPIADO!';
-                    btn.style.background = '#1e7e34';
-                    if (quickBtn) quickBtn.classList.add('copied');
-                    
-                    if (toast) {
-                        toast.style.display = 'block';
-                        setTimeout(() => { toast.style.display = 'none'; }, 2500);
-                    }
-                    
-                    setTimeout(() => {
-                        btn.innerHTML = originalHTML;
-                        btn.style.background = '#00C853';
-                        if (quickBtn) quickBtn.classList.remove('copied');
-                    }, 2000);
-                });
-            }
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = document.getElementById('btn-copy-pix-action');
+                btn.innerHTML = '<i class="fas fa-check"></i> COPIADO!';
+                btn.style.background = 'var(--success)';
+                setTimeout(() => { btn.innerHTML = 'Copiar código'; btn.style.background = ''; }, 2000);
+            });
         }
 
         function showDeliveryModal() {
