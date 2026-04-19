@@ -5,7 +5,6 @@ const cheerio = require("cheerio");
 const cookieParser = require("cookie-parser");
 const path = require("path");
 const crypto = require("crypto");
-// Removendo CookieJar e Cookie do tough-cookie para gerenciamento manual
 
 // Carrega variáveis de ambiente
 try {
@@ -44,9 +43,11 @@ const axiosInstance = axios.create({
     "X-Requested-With": "XMLHttpRequest",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
     "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Accept-Encoding": "identity", // Desabilita compressão para evitar erros de socket
+    "Connection": "close", // Força o fechamento da conexão para evitar socket hang up em retentativas
   },
   withCredentials: true,
-  timeout: 30000, // Timeout global para todas as requisições da instância
+  timeout: 30000,
 });
 
 // Interceptor de requisição para adicionar cookies do store
@@ -71,13 +72,11 @@ axiosInstance.interceptors.response.use(response => {
   return response;
 }, async error => {
   const { config, response } = error;
-  const originalRequest = config;
-
+  
   // Se a resposta for 409 e contiver o script de bot detection
   if (response && response.status === 409 && response.data.includes("humans_21909=1")) {
     console.log("Detectado erro 409 de bot detection. Tentando contornar...");
     
-    // Extrai o cookie do script e adiciona ao cookie store
     const cookieMatch = response.data.match(/document\.cookie = "(.*?)";/);
     if (cookieMatch && cookieMatch[1]) {
       const cookieString = cookieMatch[1];
@@ -86,33 +85,27 @@ axiosInstance.interceptors.response.use(response => {
       console.log(`Cookie \'${name}\' adicionado ao store.`);
     }
 
-    // Tenta a requisição original novamente
     console.log("Retentando a requisição original...");
-    return axiosInstance(originalRequest);
+    // Cria uma nova configuração para a retentativa para garantir que os headers sejam atualizados
+    const retryConfig = {
+      ...config,
+      headers: { ...config.headers }
+    };
+    return axiosInstance(retryConfig);
   }
 
   console.error("Erro na requisição Axios:", error.message);
-  if (response) {
-    console.error("Status:", response.status);
-    console.error("Data:", response.data);
-  } else if (error.request) {
-    console.error("Nenhuma resposta recebida:", error.request);
-  } else {
-    console.error("Erro ao configurar requisição:", error.message);
-  }
   return Promise.reject(error);
 });
 
 /**
  * Gera um Gmail com nome (2 letras) e sobrenome (2 primeiras + última) abreviados
- * Aprimorado para maior variabilidade e robustez.
  */
 function generateHighlyVariableGmailFromCpf(cpf) {
   const firstNames = ["gabriel", "lucas", "mateus", "felipe", "rafael", "bruno", "thiago", "vinicius", "rodrigo", "andre", "julia", "fernanda", "beatriz", "larissa", "camila", "amanda", "leticia", "mariana", "carolina", "isabela"];
   const lastNames = ["silva", "santos", "oliveira", "souza", "rodrigues", "ferreira", "alves", "pereira", "lima", "gomes", "costa", "ribeiro", "martins", "carvalho", "almeida", "lopes", "soares", "fernandes", "vieira", "barbosa"];
 
   const cleanCpf = (cpf || "").replace(/\D/g, "");
-  // Usa um hash do CPF para semente, se disponível, para maior consistência e variabilidade
   const seed = cleanCpf ? parseInt(crypto.createHash("md5").update(cleanCpf).digest("hex").substring(0, 8), 16) : Math.floor(Math.random() * 1000000);
   
   const firstName = firstNames[seed % firstNames.length].substring(0, 2);
@@ -134,10 +127,10 @@ function generateHighlyVariableGmailFromCpf(cpf) {
     `${lastName}${shortNum}${firstName}`,
     `${firstName}.${lastName}.${suffixCpf}`,
     `${lastName}_${firstName}_${shortNum}`,
-    `${firstName}${lastName}${randomNum}${shortNum}` // Novo formato
+    `${firstName}${lastName}${randomNum}${shortNum}`
   ];
   
-  const selectedFormat = formats[seed % formats.length].replace(/\s/g, "."); // Substitui espaços por pontos
+  const selectedFormat = formats[seed % formats.length].replace(/\s/g, ".");
   return `${selectedFormat}@gmail.com`.toLowerCase();
 }
 
@@ -146,7 +139,6 @@ app.post("/proxy/pix", async (req, res, next) => {
   console.log("--- Nova requisição PIX recebida ---");
   const { payer_name, payer_email, amount, payer_cpf } = req.body;
 
-  // Validação de entrada mais robusta
   if (!payer_name || !amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
     console.error("Erro: Nome ou valor inválido/ausente.");
     return res.status(400).json({ error: "Nome e valor válidos são obrigatórios." });
@@ -163,11 +155,11 @@ app.post("/proxy/pix", async (req, res, next) => {
       campaign_id: CAMPAIGN_ID,
       payer_name: payer_name,
       payer_email: finalEmail,
-      msg: "", // Mensagem opcional, pode ser expandida
-      amount: parseFloat(amount).toFixed(2), // Garante formato de duas casas decimais
+      msg: "",
+      amount: parseFloat(amount).toFixed(2),
     }).toString();
 
-    console.log("Enviando POST para ajudaja.com.br/ajudar/ajax_payment_pix.php com dados:", postData);
+    console.log("Enviando POST para ajudaja.com.br/ajudar/ajax_payment_pix.php");
     const ajudajaResponse = await axiosInstance.post("/ajudar/ajax_payment_pix.php", postData, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -175,18 +167,13 @@ app.post("/proxy/pix", async (req, res, next) => {
       },
     });
 
-    console.log("Resposta inicial do Ajudaja (status):", ajudajaResponse.status);
-    console.log("Resposta inicial do Ajudaja (data):", ajudajaResponse.data);
-
     if (ajudajaResponse.status !== 200) {
-      console.error("Erro: Resposta não-200 do provedor externo.");
       return res.status(502).json({ error: "Erro no provedor externo", details: ajudajaResponse.data });
     }
 
     const ajudajaData = ajudajaResponse.data;
     if (ajudajaData.status !== "ok" || !ajudajaData.url) {
-      console.error("Erro: Provedor recusou PIX ou dados inválidos.", ajudajaData);
-      return res.status(400).json({ error: "Provedor recusou PIX ou retornou dados inválidos", details: ajudajaData });
+      return res.status(400).json({ error: "Provedor recusou PIX", details: ajudajaData });
     }
 
     console.log("URL para página PIX:", ajudajaData.url);
@@ -194,30 +181,15 @@ app.post("/proxy/pix", async (req, res, next) => {
       headers: { "Referer": `https://ajudaja.com.br/ajudar/?x=${CAMPAIGN_ID}` },
     });
 
-    console.log("Página PIX recebida (tamanho):", pixPageResponse.data.length, "bytes");
     const $ = cheerio.load(pixPageResponse.data);
-    
-    // Tentativas de extração do código PIX com seletores mais robustos
-    let pixCode = $("input[id^=\"qr_code_text_\"]").val(); // Seletor original
-    if (!pixCode) {
-      pixCode = $("input[value^=\"0002\"]").val(); // Seletor original alternativo
-    }
-    if (!pixCode) {
-      // Adiciona seletores mais genéricos ou baseados em atributos comuns de PIX
-      pixCode = $("textarea[readonly]").val(); // Ex: alguns sites usam textarea readonly
-    }
-    if (!pixCode) {
-      pixCode = $("div:contains(\"00020\")").text().match(/00020\d{10,}/)?.[0]; // Busca por padrão de código PIX em divs
-    }
-    if (!pixCode) {
-      pixCode = $("p:contains(\"00020\")").text().match(/00020\d{10,}/)?.[0]; // Busca por padrão de código PIX em parágrafos
-    }
+    let pixCode = $("input[id^=\"qr_code_text_\"]").val() || 
+                  $("input[value^=\"0002\"]").val() || 
+                  $("textarea[readonly]").val() || 
+                  $("div:contains(\"00020\")").text().match(/00020\d{10,}/)?.[0] || 
+                  $("p:contains(\"00020\")").text().match(/00020\d{10,}/)?.[0];
 
     if (!pixCode) {
-      console.error("Erro: Não foi possível extrair o código PIX da página.");
-      // Loga o HTML para depuração em caso de falha na extração
-      // console.error("HTML da página PIX:", pixPageResponse.data);
-      return res.status(500).json({ error: "Erro ao extrair PIX. A estrutura da página pode ter mudado.", html_snippet: pixPageResponse.data.substring(0, 500) });
+      return res.status(500).json({ error: "Erro ao extrair PIX." });
     }
 
     console.log("Código PIX extraído com sucesso.");
@@ -225,24 +197,12 @@ app.post("/proxy/pix", async (req, res, next) => {
 
   } catch (err) {
     console.error("Erro interno na rota /proxy/pix:", err.message);
-    // Detalhes adicionais para depuração
-    if (err.response) {
-      console.error("Detalhes do erro da resposta externa:", err.response.status, err.response.data);
-    }
-    res.status(500).json({ error: "Erro interno do servidor", message: err.message, details: err.response ? err.response.data : "N/A" });
+    res.status(500).json({ error: "Erro interno do servidor", message: err.message });
   }
 });
 
-// Rota de health check
 app.get("/health", (req, res) => res.status(200).json({ status: "ok", timestamp: new Date().toISOString() }));
-
-// Servir arquivos estáticos da pasta \'public\'
 app.use(express.static(path.join(__dirname, "public")));
+app.get("*", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 
-// Catch-all para servir o index.html para SPAs
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
-// Inicia o servidor
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
