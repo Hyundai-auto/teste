@@ -5,6 +5,8 @@ const cheerio = require('cheerio');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const crypto = require('crypto');
+const { CookieJar } = require('tough-cookie');
+const axiosCookieJarSupport = require('axios-cookiejar-support').default;
 
 // Carrega variáveis de ambiente
 try {
@@ -31,6 +33,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Configuração do cookie jar para persistência de cookies
+const cookieJar = new CookieJar();
+
 // Configuração da instância Axios para interagir com o site externo
 const axiosInstance = axios.create({
   baseURL: 'https://ajudaja.com.br',
@@ -45,21 +50,40 @@ const axiosInstance = axios.create({
   timeout: 30000, // Timeout global para todas as requisições da instância
 });
 
-// Interceptor para gerenciar cookies de forma mais robusta
+// Aplica o suporte a cookie jar ao axiosInstance
+axiosCookieJarSupport(axiosInstance);
+axiosInstance.defaults.jar = cookieJar;
+
+// Interceptor para gerenciar cookies e lidar com o erro 409
 axiosInstance.interceptors.response.use(response => {
-  const setCookieHeader = response.headers['set-cookie'];
-  if (setCookieHeader) {
-    // Concatena todos os cookies em uma única string para o cabeçalho 'Cookie'
-    const cookies = setCookieHeader.map(cookie => cookie.split(';')[0]).join('; ');
-    // Atualiza o cabeçalho 'Cookie' para requisições subsequentes
-    response.config.headers['Cookie'] = cookies;
-  }
   return response;
-}, error => {
+}, async error => {
+  const { config, response } = error;
+  const originalRequest = config;
+
+  // Se a resposta for 409 e contiver o script de bot detection
+  if (response && response.status === 409 && response.data.includes('humans_21909=1')) {
+    console.log('Detectado erro 409 de bot detection. Tentando contornar...');
+    
+    // Extrai o cookie do script e adiciona ao cookie jar
+    const cookieMatch = response.data.match(/document\.cookie = "(.*?)";/);
+    if (cookieMatch && cookieMatch[1]) {
+      const cookieString = cookieMatch[1];
+      const [name, value] = cookieString.split('=');
+      const cookie = new Cookie({ key: name, value: value, domain: 'ajudaja.com.br' });
+      await cookieJar.setCookie(cookie, 'https://ajudaja.com.br');
+      console.log(`Cookie '${name}' adicionado ao jar.`);
+    }
+
+    // Tenta a requisição original novamente
+    console.log('Retentando a requisição original...');
+    return axiosInstance(originalRequest);
+  }
+
   console.error('Erro na requisição Axios:', error.message);
-  if (error.response) {
-    console.error('Status:', error.response.status);
-    console.error('Data:', error.response.data);
+  if (response) {
+    console.error('Status:', response.status);
+    console.error('Data:', response.data);
   } else if (error.request) {
     console.error('Nenhuma resposta recebida:', error.request);
   } else {
