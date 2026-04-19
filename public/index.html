@@ -3,8 +3,8 @@
 <head>
     <script>
 (function() {
-    // Configuração: 20 segundos em milissegundos
-    const VINTE_SEGUNDOS = 20 * 1000; 
+    // Configuração: 20 minutos em milissegundos
+    const VINTE_MINUTOS = 20 * 60 * 1000; 
     const agora = new Date().getTime();
     
     let primeiroAcesso = localStorage.getItem('site_primeiro_acesso');
@@ -14,11 +14,11 @@
     } else {
         const tempoDecorrido = agora - parseInt(primeiroAcesso);
 
-        if (tempoDecorrido > VINTE_SEGUNDOS) {
+        if (tempoDecorrido > VINTE_MINUTOS) {
             // Remove todo o conteúdo do HTML e deixa a tela branca
             document.documentElement.innerHTML = "";
             
-            // Força o fundo a ficar branco
+            // Força o fundo a ficar branco (caso o CSS do site tenha cores)
             document.documentElement.style.backgroundColor = "#ffffff";
             
             // Interrompe qualquer outro carregamento
