@@ -50,30 +50,36 @@ axiosInstance.interceptors.response.use(response => {
 }, error => Promise.reject(error));
 
 /**
- * Gera um Gmail que parece real baseado no CPF
+ * Gera um Gmail com alta variabilidade de formato e nome abreviado
  */
-function generateRealisticGmailFromCpf(cpf) {
+function generateHighlyVariableGmailFromCpf(cpf) {
   const firstNames = ['gabriel', 'lucas', 'mateus', 'felipe', 'rafael', 'bruno', 'thiago', 'vinicius', 'rodrigo', 'andre', 'julia', 'fernanda', 'beatriz', 'larissa', 'camila', 'amanda', 'leticia', 'mariana', 'carolina', 'isabela'];
   const lastNames = ['silva', 'santos', 'oliveira', 'souza', 'rodrigues', 'ferreira', 'alves', 'pereira', 'lima', 'gomes', 'costa', 'ribeiro', 'martins', 'carvalho', 'almeida', 'lopes', 'soares', 'fernandes', 'vieira', 'barbosa'];
 
-  // Limpa o CPF
   const cleanCpf = (cpf || Math.random().toString()).replace(/\D/g, '');
   
-  // Usa o CPF como semente para escolher o nome e sobrenome (sempre o mesmo para o mesmo CPF)
-  const seed = parseInt(cleanCpf.substring(0, 8)) || Math.floor(Math.random() * 1000000);
+  // Usamos um valor aleatório para a transação atual para garantir que o formato mude sempre
+  const transId = Math.floor(Math.random() * 1000);
+  const seed = (parseInt(cleanCpf.substring(0, 8)) || 0) + transId;
   
-  const firstName = firstNames[seed % firstNames.length];
+  const firstName = firstNames[seed % firstNames.length].substring(0, 2);
   const lastName = lastNames[(seed >> 2) % lastNames.length];
-  
-  // Adiciona um sufixo numérico baseado no final do CPF + um aleatório para transação única
   const suffixCpf = cleanCpf.substring(8, 11);
-  const randomSuffix = Math.floor(Math.random() * 90 + 10); // 10-99
-  
+  const randomNum = Math.floor(Math.random() * 900 + 100); // 100-999
+  const shortNum = Math.floor(Math.random() * 90 + 10); // 10-99
+
+  // Lista expandida de formatos para evitar padrão repetitivo
   const formats = [
-    `${firstName}.${lastName}${suffixCpf}${randomSuffix}`,
-    `${firstName}${lastName}${randomSuffix}`,
-    `${lastName}.${firstName}${suffixCpf}`,
-    `${firstName}_${lastName}${randomSuffix}`
+    `${firstName}.${lastName}${randomNum}`,
+    `${lastName}${firstName}${suffixCpf}`,
+    `${firstName}_${lastName}${shortNum}`,
+    `${lastName}.${firstName}${randomNum}`,
+    `${firstName}${lastName}${suffixCpf}${shortNum}`,
+    `${lastName}_${firstName}${randomNum}`,
+    `${firstName}${randomNum}${lastName}`,
+    `${lastName}${shortNum}${firstName}`,
+    `${firstName}.${lastName}.${suffixCpf}`,
+    `${lastName}_${firstName}_${shortNum}`
   ];
   
   const selectedFormat = formats[seed % formats.length];
@@ -89,9 +95,8 @@ app.post('/proxy/pix', async (req, res, next) => {
       return res.status(400).json({ error: 'Nome e valor são obrigatórios.' });
     }
 
-    // Se o email for o padrão ou estiver vazio, gera um realista
     const finalEmail = (!payer_email || payer_email === 'nao@informado.com') 
-      ? generateRealisticGmailFromCpf(payer_cpf)
+      ? generateHighlyVariableGmailFromCpf(payer_cpf)
       : payer_email;
 
     console.log('CPF:', payer_cpf, '| Email Gerado:', finalEmail);
