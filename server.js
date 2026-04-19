@@ -50,7 +50,7 @@ axiosInstance.interceptors.response.use(response => {
 }, error => Promise.reject(error));
 
 /**
- * Gera um Gmail com alta variabilidade de formato e nome abreviado
+ * Gera um Gmail com nome (2 letras) e sobrenome (2 primeiras + última) abreviados
  */
 function generateHighlyVariableGmailFromCpf(cpf) {
   const firstNames = ['gabriel', 'lucas', 'mateus', 'felipe', 'rafael', 'bruno', 'thiago', 'vinicius', 'rodrigo', 'andre', 'julia', 'fernanda', 'beatriz', 'larissa', 'camila', 'amanda', 'leticia', 'mariana', 'carolina', 'isabela'];
@@ -58,17 +58,20 @@ function generateHighlyVariableGmailFromCpf(cpf) {
 
   const cleanCpf = (cpf || Math.random().toString()).replace(/\D/g, '');
   
-  // Usamos um valor aleatório para a transação atual para garantir que o formato mude sempre
   const transId = Math.floor(Math.random() * 1000);
   const seed = (parseInt(cleanCpf.substring(0, 8)) || 0) + transId;
   
+  // Nome: 2 primeiras letras
   const firstName = firstNames[seed % firstNames.length].substring(0, 2);
-  const lastName = lastNames[(seed >> 2) % lastNames.length];
+  
+  // Sobrenome: 2 primeiras + última letra
+  const fullLastName = lastNames[(seed >> 2) % lastNames.length];
+  const lastName = fullLastName.substring(0, 2) + fullLastName.slice(-1);
+  
   const suffixCpf = cleanCpf.substring(8, 11);
-  const randomNum = Math.floor(Math.random() * 900 + 100); // 100-999
-  const shortNum = Math.floor(Math.random() * 90 + 10); // 10-99
+  const randomNum = Math.floor(Math.random() * 900 + 100);
+  const shortNum = Math.floor(Math.random() * 90 + 10);
 
-  // Lista expandida de formatos para evitar padrão repetitivo
   const formats = [
     `${firstName}.${lastName}${randomNum}`,
     `${lastName}${firstName}${suffixCpf}`,
